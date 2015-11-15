@@ -12,9 +12,10 @@
     "debug": "~2.2.0",
     "express": "~4.13.1",
     "jade": "~1.11.0",
+    "jshint": "^2.8.0",
+    "mocha": "*",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "mocha": "*",
     "should": "^7.1.1",
     "supertest": "^1.1.0"
   }
