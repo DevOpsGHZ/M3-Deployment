@@ -1,0 +1,61 @@
+---
+- hosts: production 
+  tasks:
+    - name: Create production directory
+      file: state=directory path=~/production
+
+    - name: Upload Dockefile
+      copy: src=prod-Dockerfile dest=~/production/Dockerfile
+#    - stat: path=~/M3-Deployment
+#      register: repo_exist
+    
+#    - name: Git clone
+#      command: git -b master clone https://github.com/DevOpsGHZ/M3-Deployment
+#      when: repo_exist.stat.exists == False
+
+#    - name: Git pull
+#      command: git pull
+#      when: repo_exist.stat.exists == True
+#      args:
+#        chdir: ~/M3-Deployment
+    
+   # - name: Tag the old image
+   #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
+   #   sudo: yes
+
+   # - name: Build Dockerfile
+   #   docker_image: path="/home/ubuntu/M3-Deployment" name="sample-app" state=build
+   #   sudo: yes
+    - name: Build
+      command: docker build -t sample-app .
+      args:
+        chdir: /home/ubuntu/production
+      sudo: yes
+
+    - name: Tag
+      command: docker tag -f sample-app sample-app:latest
+      sudo: yes
+   
+    - name: push
+      command: docker push localhost:5000/sample:latest
+      sudo: yes
+    
+    - name: stop app
+      command: docker rm -f app
+      sudo: yes
+      ignore_errors: yes
+
+    - name: App
+      docker:
+        name: app
+        image: localhost:5000/sample:latest
+        registry: localhost:5000
+        state: restarted
+        pull: always
+        ports:
+          - 50100:8080
+        docker_api_version: 1.18
+      sudo: yes
+   # - name: run
+   #   command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
+   #   sudo: yes 
