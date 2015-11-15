@@ -10,6 +10,9 @@ var users = require('./routes/users');
 
 var app = express();
 
+var redis = require('redis')
+var client = redis.createClient(6379, '127.0.0.1', {})
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -24,6 +27,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.get('/set', function(req, res) {
+  client.set("key", "This message will self-destruct in 10 seconds");
+  client.expire("key",10);
+  res.end();
+})
+
+app.get('/get', function(req, res) {
+  client.get("key",function(err, reply) {
+    // reply is null when the key is missing
+    //console.log("Hello");
+    if(reply == null)
+    {
+      res.send('There is no value for key');
+    }
+    else
+    {
+      res.send(reply);
+    }
+    });
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -31,6 +54,8 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+
 
 // error handlers
 
