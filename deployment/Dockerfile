@@ -10,8 +10,8 @@ RUN wget http://download.redis.io/releases/redis-3.0.5.tar.gz
 RUN tar xzf redis-3.0.5.tar.gz
 RUN cd /redis-3.0.5; make
 RUN cd /
-COPY . ../src
-RUN cd /src/src; npm install
+RUN git clone https://github.com/DevOpsGHZ/M3-Deployment
+RUN cd /M3-Deployment/src; npm install
 EXPOSE 8080
-WORKDIR /src/src
+WORKDIR /M3-Deployment/src
 CMD ["nodejs", "app.js"]
