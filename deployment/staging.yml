@@ -1,23 +1,18 @@
 ---
 - hosts: production 
   tasks:
-    - name: Create production directory
-      file: state=directory path=~/production
-
-    - name: Upload Dockefile
-      copy: src=prod-Dockerfile dest=~/production/Dockerfile
-#    - stat: path=~/M3-Deployment
-#      register: repo_exist
+    - stat: path=~/M3-Deployment
+      register: repo_exist
     
-#    - name: Git clone
-#      command: git -b master clone https://github.com/DevOpsGHZ/M3-Deployment
-#      when: repo_exist.stat.exists == False
+    - name: Git clone
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
 
-#    - name: Git pull
-#      command: git pull
-#      when: repo_exist.stat.exists == True
-#      args:
-#        chdir: ~/M3-Deployment
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/M3-Deployment
     
    # - name: Tag the old image
    #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
@@ -29,7 +24,7 @@
     - name: Build
       command: docker build -t sample-app .
       args:
-        chdir: /home/ubuntu/production
+        chdir: /home/ubuntu/M3-Deployment/deployment
       sudo: yes
 
     - name: Tag
