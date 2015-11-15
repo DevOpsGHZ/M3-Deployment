@@ -35,7 +35,7 @@ describe('routes', function(){
   it('should have text content in homepage', function(done){
     request(app)
       .get('/')
-      .expect('Content-Length',22)
+      .expect('Content-Length',223)
       .expect(200, done);
   })
 
