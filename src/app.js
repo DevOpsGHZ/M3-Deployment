@@ -56,7 +56,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(8080);
 module.exports = app;
 
 var sio = require('socket.io')
@@ -73,7 +72,7 @@ io = sio.listen(server);
 function memoryLoad()
 {
   // console.log( os.totalmem(), os.freemem() );
-  return (os.totalmem() - os.freemem()) / os.totalmem();
+  return ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
 }
 
 // Create function to get CPU information
@@ -112,7 +111,7 @@ function cpuAverage()
   var totalDifference = endMeasure.total - startMeasure.total;
  
   //Calculate the average percentage CPU usage
-  return idleDifference / totalDifference;
+  return ~~ ( 100 * (totalDifference - idleDifference) / totalDifference );
 }
 
 function measureLatenancy(server)
