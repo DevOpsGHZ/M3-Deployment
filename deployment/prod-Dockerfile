@@ -12,6 +12,6 @@ RUN cd /redis-3.0.5; make
 RUN cd /
 RUN git clone -b master https://github.com/DevOpsGHZ/M3-Deployment
 RUN cd /M3-Deployment/src; npm install
-EXPOSE 8080
+EXPOSE 3000
 WORKDIR /M3-Deployment/src
 CMD ["nodejs", "app.js"]
