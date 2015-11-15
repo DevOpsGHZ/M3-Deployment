@@ -14,4 +14,4 @@ COPY . /src
 RUN cd /src/src; npm install
 EXPOSE 8080
 WORKDIR /src/src
-CMD ["node", "app.js"]
+CMD ["nodejs", "app.js"]
