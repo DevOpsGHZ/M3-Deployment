@@ -8,36 +8,36 @@
     - name: Install pip
       apt: pkg=python-pip state=installed update_cache=true
       sudo: yes
-    
+
     - name: install docker-py
       command: pip install docker-py
       sudo: yes
 
-    - stat: path=~/App
+    - stat: path=~/M3-Deployment
       register: repo_exist
     
     - name: Git clone
-      command: git clone https://github.com/CSC-DevOps/App.git
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
       when: repo_exist.stat.exists == False
 
     - name: Git pull
       command: git pull
       when: repo_exist.stat.exists == True
       args:
-        chdir: ~/App
+        chdir: ~/M3-Deployment
     
     - name: Build Dockerfile
-      docker_image: path="/home/ubuntu/App" name="ncsu-app" state=build
+      docker_image: path="/home/ubuntu/M3-Deployment" name="sample-app" state=build
       sudo: yes
     
     - name: Tag
-      command: docker tag ncsu-app localhost:5000/ncsu:latest
+      command: docker tag sample-app localhost:5000/sample:latest
       sudo: yes
    
     - name: push
-      command: docker push localhost:5000/ncsu:latest
+      command: docker push localhost:5000/sample:latest
       sudo: yes
       
     - name: run
-      command: docker run -p 50100:8080 -d --name app localhost:5000/ncsu:latest
+      command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
       sudo: yes 
