@@ -11,7 +11,7 @@ var users = require('./routes/users');
 var app = express();
 console.log(process.env.REDIS_PORT_6379_TCP_ADDR + ':' + process.env.REDIS_PORT_6379_TCP_PORT);
 var redis = require('redis')
-var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT, rocess.env.REDIS_PORT_6379_TCP_ADDR, {})
+var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT, process.env.REDIS_PORT_6379_TCP_ADDR, {})
 ss.env.REDIS_PORT_6379_TCP_PORT.log(process.env.REDIS_PORT_6379_TCP_ADDR + ':' + process.env.REDIS_PORT_6379_TCP_PORT);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
