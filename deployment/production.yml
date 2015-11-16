@@ -6,18 +6,21 @@
 
     - name: Upload Dockefile
       copy: src=prod-Dockerfile dest=~/production/Dockerfile
-#    - stat: path=~/M3-Deployment
-#      register: repo_exist
     
-#    - name: Git clone
-#      command: git -b master clone https://github.com/DevOpsGHZ/M3-Deployment
-#      when: repo_exist.stat.exists == False
+    - stat: path=~/production/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/production
 
-#    - name: Git pull
-#      command: git pull
-#      when: repo_exist.stat.exists == True
-#      args:
-#        chdir: ~/M3-Deployment
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/production/M3-Deployment
     
    # - name: Tag the old image
    #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
@@ -32,8 +35,8 @@
         image: redis
         command: redis-server --appendonly yes
         state: started
-        ports:
-          - 6379:6379
+        expose:
+          - 6379
         docker_api_version: 1.18
       sudo: yes
 
@@ -63,9 +66,10 @@
         registry: localhost:5000
         state: restarted
         pull: always
+        links:
+          - "myredis:redis"
         ports:
           - 3000:3000
-          - 6379:6379
         docker_api_version: 1.18
       sudo: yes
    # - name: run
