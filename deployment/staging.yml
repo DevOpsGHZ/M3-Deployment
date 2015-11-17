@@ -64,7 +64,7 @@
         state: restarted
         pull: always
         ports:
-          - 3001:3000
+          - 3002:3000
           - 6379:6379
         docker_api_version: 1.18
       sudo: yes

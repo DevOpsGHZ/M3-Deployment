@@ -69,7 +69,7 @@
         links:
           - "myredis:redis"
         ports:
-          - 3000:3000
+          - 3001:3000
         docker_api_version: 1.18
       sudo: yes
    # - name: run
