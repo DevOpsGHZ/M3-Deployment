@@ -24,7 +24,14 @@ var infrastructure =
 
     var server  = http.createServer(function(req, res)
     {
-      proxy.web( req, res, {target: instance2 } );  
+      var p = Math.random();
+      if( p < 0.7) {
+        proxy.web( req, res, {target: instance1 } );  
+      }
+      else
+      {
+        proxy.web( req, res, {target: instance2 } );   
+      }
       // client.rpoplpush('servers', 'servers', function (err, reply){
         // proxy.web( req, res, {target: reply } );  
       // })
