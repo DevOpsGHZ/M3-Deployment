@@ -4,9 +4,11 @@ var redis = require('redis')
 var exec = require('child_process').exec;
 var request = require("request");
 // var client = redis.createClient(6379, '127.0.0.1', {})
-var instance1 = 'http://127.0.0.1:3000';
-var instance2  = 'http://127.0.0.1:3001';
+//var instance1 = 'http://127.0.0.1:3000';
+//var instance2  = 'http://127.0.0.1:3001';
 
+var instance1 = process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
+var instance2 = process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
 // var TARGET = BLUE;
 
 var infrastructure =
