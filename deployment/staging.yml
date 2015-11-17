@@ -6,18 +6,21 @@
 
     - name: Upload Dockefile
       copy: src=stage-Dockerfile dest=~/staging/Dockerfile
-#    - stat: path=~/M3-Deployment
-#      register: repo_exist
-    
-#    - name: Git clone
-#      command: git -b master clone https://github.com/DevOpsGHZ/M3-Deployment
-#      when: repo_exist.stat.exists == False
 
-#    - name: Git pull
-#      command: git pull
-#      when: repo_exist.stat.exists == True
-#      args:
-#        chdir: ~/M3-Deployment
+    - stat: path=~/staging/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone -b dev --single-branch https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/staging
+
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/staging/M3-Deployment
     
    # - name: Tag the old image
    #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
@@ -32,19 +35,19 @@
         image: redis
         command: redis-server --appendonly yes
         state: started
-        ports:
-          - 6379:6379
+        expose:
+          - 6379
         docker_api_version: 1.18
       sudo: yes
 
     - name: Build
-      command: docker build -t sample-app .
+      command: docker build -t staging-app .
       args:
         chdir: /home/ubuntu/staging
       sudo: yes
 
     - name: Tag
-      command: docker tag -f sample-app localhost:5000/sample:staging
+      command: docker tag -f staging-app localhost:5000/sample:staging
       sudo: yes
    
     - name: push
@@ -63,9 +66,10 @@
         registry: localhost:5000
         state: restarted
         pull: always
+        links:
+          - "myredis:redis"
         ports:
           - 3002:3000
-          - 6379:6379
         docker_api_version: 1.18
       sudo: yes
    # - name: run
