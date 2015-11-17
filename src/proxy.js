@@ -14,9 +14,9 @@ var infrastructure =
   setup: function()
   {
     // Proxy.
-    client.lpush('servers', instance1);
-    client.lpush('servers', instance2);
-    client.ltrim('servers', 0, 1);
+//    client.lpush('servers', instance1);
+//    client.lpush('servers', instance2);
+//    client.ltrim('servers', 0, 1);
     var options = {};
     var proxy   = httpProxy.createProxyServer(options);
 
