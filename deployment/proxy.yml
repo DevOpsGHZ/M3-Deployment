@@ -74,6 +74,7 @@
           - 3000:3000
           - 3001:3001
           - 3002:3002
+          - 8080:8080
         docker_api_version: 1.18
       sudo: yes
    # - name: run
