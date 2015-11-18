@@ -8,10 +8,11 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+
 var app = express();
-console.log(process.env.REDIS_PORT_6379_TCP_ADDR + ':' + process.env.REDIS_PORT_6379_TCP_PORT);
+// console.log(process.env.REDIS_PORT_6379_TCP_ADDR + ':' + process.env.REDIS_PORT_6379_TCP_PORT);
 var redis = require('redis')
-var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT, process.env.REDIS_PORT_6379_TCP_ADDR, {})
+var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT,process.env.REDIS_PORT_6379_TCP_ADDR, {})
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -26,11 +27,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+//app.use('/manage', manage);
 app.get('/set', function(req, res) {
   client.set("key", "This message will self-destruct in 10 seconds");
   client.expire("key",10);
   res.end();
 })
+
 
 app.get('/get', function(req, res) {
   client.get("key",function(err, reply) {
@@ -46,6 +49,55 @@ app.get('/get', function(req, res) {
     }
     });
 })
+
+app.get('/fon',function(req,res){
+  client.set("featureFlag", "on");
+  res.send('feature is on');
+});
+app.get('/foff',function(req,res){
+  client.set("featureFlag", "off");
+  res.send('feature is off');
+});
+app.get('/fstatus',function(req,res){
+  client.get("featureFlag",function(err, reply) {
+    // reply is null when the key is missing
+    //console.log("Hello");
+    if(reply == null)
+    {
+      res.send('There is no value for key');
+    }
+    else
+    {
+      res.send(reply);
+    }
+    });
+
+});
+
+app.get('/feature',function(req,res){
+  client.get("featureFlag",function(err, reply) {
+    // reply is null when the key is missing
+    //console.log("Hello");
+    if(reply == null)
+    {
+      res.send('The status of this feature is unkown');
+    }
+    else if (reply=='on')
+    {
+      res.render('feature', { title: 'Feature' });
+      res.end(); 
+    }
+    else
+    {
+      res.render('unavailable', { title: 'Not available' });
+      res.end();
+    }
+
+    });});
+
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
