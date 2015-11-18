@@ -1,8 +1,44 @@
 # M3-Deployment
 
-###Automatic configuration of production environment
 
-###Triggered, remote deployment:
+###Configuration and deployment:
+####1. Automatic configuration:
+Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
+`ansible-playbook provision.yml -i inventory`
+####2. Deployment:
+Use production.yml through command  `ansible-playbook production.yml -i inventory` to
+ 
+* Clone the repository that has the sample app and keep it up-to-date
+* Build image then run the container for the sample app 
+* Run redis container from exiting redis image
+* Link the sample app container and the redis container
+
+
+
+ 
+ Sample app image:
+
+```
+FROM ubuntu:14.04
+MAINTAINER Kelei Gong, kgong@ncsu.edu
+
+RUN apt-get update
+RUN apt-get -y install git
+RUN apt-get -y install nodejs
+RUN apt-get -y install npm
+COPY ./M3-Deployment/src /src
+RUN cd /src; npm install
+EXPOSE 3000
+WORKDIR /src
+CMD ["nodejs", "app.js"]
+
+```
+
+
+
+
+
+
 ###Feature Flags
 
 ####1. UI guide
@@ -68,3 +104,40 @@ app.get('/feature',function(req,res){
  
 ###Metrics and alerts:
 ###Canary releasing:
+To perform canary release, we use three port to mock different servers. Port 3000 for proxy, 3001 for production and 3002 for staging server. 
+    
+With the probablity of 70%, the proxy server will route traffic to production server, and 30% to the staging server. If alert arise, the proxy will stop routing.
+
+Relavent code in proxy.js:
+
+```
+var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
+ var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
+
+
+
+var server  = http.createServer(function(req, res)
+{
+     client.get("route",function(err, reply) {
+        if(reply == 0 || reply == null)
+        {
+          proxy.web( req, res, {target: instance1 } );  
+        }
+        else
+        {
+          var p = Math.random();
+          if( p < 0.7) {
+            proxy.web( req, res, {target: instance1 } );  
+          }
+          else
+          {
+            proxy.web( req, res, {target: instance2 } );   
+          }
+        }
+});
+
+```
+
+#### Structure:
+
+![srtucture](images/structure.jpg)
