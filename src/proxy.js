@@ -4,6 +4,7 @@ var redis = require('redis')
 var exec = require('child_process').exec;
 var request = require("request");
 var os = require("os");
+var nodemailer = require('nodemailer');
 // var client = redis.createClient(6379, '127.0.0.1', {})
 // var instance1 = 'http://127.0.0.1:3000';
 // var instance2  = 'http://127.0.0.1:3030';
@@ -192,6 +193,14 @@ function measureLatenancy(node)
   if(node.latency > 1000)
   {
     client.set("route", 0);
+
+    var transporter = nodemailer.createTransport();
+    transporter.sendMail({
+    from: 'automail@DevOpsGHZ.com',
+    to: 'kgong@ncsu.edu',
+    subject: 'High Latency Detected',
+    text: 'High latency detected in server ' + options.url
+    });
   }
   return node.latency;
 }
