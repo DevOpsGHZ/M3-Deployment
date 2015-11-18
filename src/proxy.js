@@ -45,16 +45,16 @@ var infrastructure =
     io = require('socket.io').listen(server);
 
     // Launch green slice
-    // exec('forever start --watch main.js 3000', function(err, out, code) 
-    // {
-    //   console.log("attempting to launch instance1");
-    //   if (err instanceof Error)
-    //         throw err;
-    //   if( err )
-    //   {
-    //     console.error( err );
-    //   }
-    // });
+    exec('http-server', function(err, out, code) 
+     {
+       console.log("attempting to launch instance1");
+       if (err instanceof Error)
+             throw err;
+       if( err )
+       {
+         console.error( err );
+       }
+     });
 
     // // Launch blue slice
     // exec('forever start --watch main2.js 3001', function(err, out, code) 
