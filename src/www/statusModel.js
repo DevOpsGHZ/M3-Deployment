@@ -90,7 +90,7 @@ $(document).ready( function()
     ko.applyBindings(viewModel);
     $('#statusTable').DataTable( { "paging":   false, "info":     false });
 
-    var socket = io.connect('http://localhost:3000');
+    var socket = io.connect('http://localhost:3080');
 
     socket.on("heartbeat", function(client) 
     {
@@ -103,5 +103,8 @@ $(document).ready( function()
             latency: client.latency,
             nodes:client.nodes 
         });
+        // alert
+        if(client.latency > 10)
+            $.get("http://127.0.0.1:7379/SET/key/value123");
     });
 }); 
