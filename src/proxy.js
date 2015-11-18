@@ -41,13 +41,12 @@ var infrastructure =
       // res.send("haha");
       // console.log(res);
     });
-    server.listen(3000);
-    io = require('socket.io').listen(server);
+
 
     // Launch green slice
     exec('cd www; http-server', function(err, out, code) 
      {
-       console.log("attempting to launch instance1");
+       console.log("attempting to launch monitor");
        if (err instanceof Error)
              throw err;
        if( err )
@@ -56,6 +55,8 @@ var infrastructure =
        }
      });
 
+    server.listen(3000);
+    io = require('socket.io').listen(server);
     // // Launch blue slice
     // exec('forever start --watch main2.js 3001', function(err, out, code) 
     // {
