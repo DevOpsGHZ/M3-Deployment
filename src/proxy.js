@@ -45,7 +45,7 @@ var infrastructure =
     io = require('socket.io').listen(server);
 
     // Launch green slice
-    exec('http-server', function(err, out, code) 
+    exec('cd www; http-server', function(err, out, code) 
      {
        console.log("attempting to launch instance1");
        if (err instanceof Error)
