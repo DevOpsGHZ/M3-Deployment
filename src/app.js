@@ -52,11 +52,13 @@ app.get('/get', function(req, res) {
 
 app.get('/fon',function(req,res){
   client.set("featureFlag", "on");
-  res.send('feature is on');
+  res.render('statuson', { title: 'Status' });
+  res.end();
 });
 app.get('/foff',function(req,res){
   client.set("featureFlag", "off");
-  res.send('feature is off');
+  res.render('statusoff', { title: 'Status' });
+  res.end();
 });
 app.get('/fstatus',function(req,res){
   client.get("featureFlag",function(err, reply) {
@@ -64,11 +66,18 @@ app.get('/fstatus',function(req,res){
     //console.log("Hello");
     if(reply == null)
     {
-      res.send('There is no value for key');
+      res.render('statusunknown', { title: 'Status' });
+      res.end(); 
+    }
+    else if (reply=='on')
+    {
+      res.render('statuson', { title: 'Status' });
+      res.end(); 
     }
     else
     {
-      res.send(reply);
+      res.render('statusoff', { title: 'Status' });
+      res.end();
     }
     });
 
@@ -80,7 +89,8 @@ app.get('/feature',function(req,res){
     //console.log("Hello");
     if(reply == null)
     {
-      res.send('The status of this feature is unkown');
+      res.render('statusunknown', { title: 'Status' });
+      res.end(); 
     }
     else if (reply=='on')
     {
