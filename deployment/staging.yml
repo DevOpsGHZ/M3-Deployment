@@ -1,5 +1,5 @@
 ---
-- hosts: all 
+- hosts: server 
   tasks:
     - name: Create staging directory
       file: state=directory path=~/staging

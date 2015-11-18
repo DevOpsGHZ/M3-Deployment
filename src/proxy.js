@@ -4,9 +4,11 @@ var redis = require('redis')
 var exec = require('child_process').exec;
 var request = require("request");
 // var client = redis.createClient(6379, '127.0.0.1', {})
-var instance1 = 'http://127.0.0.1:3000';
-var instance2  = 'http://127.0.0.1:3001';
+//var instance1 = 'http://127.0.0.1:3000';
+//var instance2  = 'http://127.0.0.1:3001';
 
+var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
+var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
 // var TARGET = BLUE;
 
 var infrastructure =
@@ -14,15 +16,22 @@ var infrastructure =
   setup: function()
   {
     // Proxy.
-    client.lpush('servers', instance1);
-    client.lpush('servers', instance2);
-    client.ltrim('servers', 0, 1);
+//    client.lpush('servers', instance1);
+//    client.lpush('servers', instance2);
+//    client.ltrim('servers', 0, 1);
     var options = {};
     var proxy   = httpProxy.createProxyServer(options);
 
     var server  = http.createServer(function(req, res)
     {
-      proxy.web( req, res, {target: instance2 } );  
+      var p = Math.random();
+      if( p < 0.7) {
+        proxy.web( req, res, {target: instance1 } );  
+      }
+      else
+      {
+        proxy.web( req, res, {target: instance2 } );   
+      }
       // client.rpoplpush('servers', 'servers', function (err, reply){
         // proxy.web( req, res, {target: reply } );  
       // })

@@ -1,5 +1,5 @@
 ---
-- hosts: production 
+- hosts: server 
   tasks:
     - name: Create proxy directory
       file: state=directory path=~/proxy
@@ -47,7 +47,7 @@
       sudo: yes
 
     - name: Tag
-      command: docker tag -f proxy plocalhost:5000/sample:proxy
+      command: docker tag -f proxy localhost:5000/sample:proxy
       sudo: yes
    
     - name: push
@@ -68,8 +68,12 @@
         pull: always
         links:
           - "myredis:redis"
+          - "app:production"
+          - "staging-app:staging"
         ports:
           - 3000:3000
+          - 3001:3001
+          - 3002:3002
         docker_api_version: 1.18
       sudo: yes
    # - name: run
