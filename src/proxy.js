@@ -102,6 +102,7 @@ process.on('uncaughtException', function(err){
 
 function memoryLoad()
 {
+  console.log("memoryLoad");
   return ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
 }
 
