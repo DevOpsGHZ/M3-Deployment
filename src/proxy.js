@@ -3,6 +3,7 @@ var httpProxy = require('http-proxy');
 var redis = require('redis')
 var exec = require('child_process').exec;
 var request = require("request");
+var os = require("os");
 // var client = redis.createClient(6379, '127.0.0.1', {})
 // var instance1 = 'http://127.0.0.1:3000';
 // var instance2  = 'http://127.0.0.1:3030';
@@ -10,6 +11,7 @@ var request = require("request");
 var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
 var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
 // var TARGET = BLUE;
+var io;
 
 var infrastructure =
 {
@@ -39,7 +41,8 @@ var infrastructure =
       // res.send("haha");
       // console.log(res);
     });
-    server.listen(3000);
+    server.listen(3080);
+    io = require('socket.io').listen(server);
 
     // Launch green slice
     // exec('forever start --watch main.js 3000', function(err, out, code) 
@@ -95,17 +98,6 @@ process.on('uncaughtException', function(err){
 
 
 ///////////////////////////////////////////////////////////////// monitor
-var sio = require('socket.io')
-  , http = require('http')
-  , request = require('request')
-  , os = require('os')
-  ;
-
-var app = http.createServer(function (req, res) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end();
-    })
-  , io = sio.listen(app);
 
 function memoryLoad()
 {
@@ -228,7 +220,7 @@ setInterval( function ()
 
 }, 2000);
 
-app.listen(3080);
+// app.listen(3080);
 
 /// NODE SERVERS
 
