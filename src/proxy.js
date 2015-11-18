@@ -147,7 +147,7 @@ function measureLatenancy(node)
 {
   var options = 
   {
-    url: 'http://localhost' + ":" + node.port,
+    url: 'http://' + node.addr + ":" + node.port,
   };
 
   var startTime = Date.now();
@@ -202,10 +202,10 @@ function calcuateColor()
 
 /// CHILDREN nodes
 var nodeServers = [];
-nodeServers.push( { 'port': process.env.PRODUCTION_PORT_3000_TCP_PORT, 'latency': 0 } );
-nodeServers.push( { 'port': process.env.STAGING_PORT_3000_TCP_PORT, 'latency': 0 } );
+nodeServers.push( { 'addr': process.env.PRODUCTION_PORT_3000_TCP_ADDR, 'port': process.env.PRODUCTION_PORT_3000_TCP_PORT, 'latency': 0 } );
+nodeServers.push( { 'addr': process.env.STAGING_PORT_3000_TCP_ADDR, 'port': process.env.STAGING_PORT_3000_TCP_PORT, 'latency': 0 } );
 
-var appNode = { 'port': 3000, 'latency': 0 };
+var appNode = {'addr': 'localhost', 'port': 3000, 'latency': 0 };
 
 ///////////////
 //// Broadcast heartbeat over websockets
