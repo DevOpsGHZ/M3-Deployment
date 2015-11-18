@@ -41,7 +41,7 @@ var infrastructure =
       // res.send("haha");
       // console.log(res);
     });
-    server.listen(3080);
+    server.listen(3000);
     io = require('socket.io').listen(server);
 
     // Launch green slice
@@ -205,7 +205,7 @@ var nodeServers = [];
 nodeServers.push( { 'port': process.env.PRODUCTION_PORT_3000_TCP_PORT, 'latency': 0 } );
 nodeServers.push( { 'port': process.env.STAGING_PORT_3000_TCP_PORT, 'latency': 0 } );
 
-var appNode = { 'port': 3080, 'latency': 0 };
+var appNode = { 'port': 3000, 'latency': 0 };
 
 ///////////////
 //// Broadcast heartbeat over websockets
