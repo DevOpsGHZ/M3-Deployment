@@ -7,6 +7,7 @@ var os = require("os");
 // var client = redis.createClient(6379, '127.0.0.1', {})
 // var instance1 = 'http://127.0.0.1:3000';
 // var instance2  = 'http://127.0.0.1:3030';
+var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT,process.env.REDIS_PORT_6379_TCP_ADDR, {})
 
 var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
 var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
@@ -26,14 +27,24 @@ var infrastructure =
 
     var server  = http.createServer(function(req, res)
     {
-      var p = Math.random();
-      if( p < 0.7) {
-        proxy.web( req, res, {target: instance1 } );  
-      }
-      else
-      {
-        proxy.web( req, res, {target: instance2 } );   
-      }
+      client.get("route",function(err, reply) {
+        if(reply == 0 || reply == null)
+        {
+          proxy.web( req, res, {target: instance1 } );  
+        }
+        else
+        {
+          var p = Math.random();
+          if( p < 0.7) {
+            proxy.web( req, res, {target: instance1 } );  
+          }
+          else
+          {
+            proxy.web( req, res, {target: instance2 } );   
+          }
+        }
+      });
+      
       // client.rpoplpush('servers', 'servers', function (err, reply){
         // proxy.web( req, res, {target: reply } );  
       // })
@@ -41,21 +52,22 @@ var infrastructure =
       // res.send("haha");
       // console.log(res);
     });
-    server.listen(3080);
-    io = require('socket.io').listen(server);
+
 
     // Launch green slice
-    // exec('forever start --watch main.js 3000', function(err, out, code) 
-    // {
-    //   console.log("attempting to launch instance1");
-    //   if (err instanceof Error)
-    //         throw err;
-    //   if( err )
-    //   {
-    //     console.error( err );
-    //   }
-    // });
+    exec('cd www; http-server', function(err, out, code) 
+     {
+       console.log("attempting to launch monitor");
+       if (err instanceof Error)
+             throw err;
+       if( err )
+       {
+         console.error( err );
+       }
+     });
 
+    server.listen(3000);
+    io = require('socket.io').listen(server);
     // // Launch blue slice
     // exec('forever start --watch main2.js 3001', function(err, out, code) 
     // {
@@ -101,7 +113,17 @@ process.on('uncaughtException', function(err){
 
 function memoryLoad()
 {
-  return ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
+  // console.log("memoryLoad");
+  var load = ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
+  if(load > 90)
+  {
+    client.set("route", 0);
+  }
+  // if(load < 70)
+  // {
+  //   client.set("route", 1); 
+  // }
+  return load;
 }
 
 // Create function to get CPU information
@@ -140,14 +162,21 @@ function cpuAverage()
   var totalDifference = endMeasure.total - startMeasure.total;
  
   //Calculate the average percentage CPU usage
-  return ~~ ( 100 * (totalDifference - idleDifference) / totalDifference );
+  var usage = ~~ ( 100 * (totalDifference - idleDifference) / totalDifference );
+  if(usage > 50)
+  {
+    client.set("route", 0);
+  }
+  // if( usage <)
+
+  return usage;
 }
 
 function measureLatenancy(node)
 {
   var options = 
   {
-    url: 'http://localhost' + ":" + node.port,
+    url: 'http://' + node.addr + ":" + node.port,
   };
 
   var startTime = Date.now();
@@ -156,7 +185,10 @@ function measureLatenancy(node)
   {
     node.latency = Date.now() - startTime;
   });
-
+  if(node.latency > 1000)
+  {
+    client.set("route", 0);
+  }
   return node.latency;
 }
 
@@ -202,10 +234,10 @@ function calcuateColor()
 
 /// CHILDREN nodes
 var nodeServers = [];
-nodeServers.push( { 'port': process.env.PRODUCTION_PORT_3000_TCP_PORT, 'latency': 0 } );
-nodeServers.push( { 'port': process.env.STAGING_PORT_3000_TCP_PORT, 'latency': 0 } );
+nodeServers.push( { 'addr': process.env.PRODUCTION_PORT_3000_TCP_ADDR, 'port': process.env.PRODUCTION_PORT_3000_TCP_PORT, 'latency': 0 } );
+nodeServers.push( { 'addr': process.env.STAGING_PORT_3000_TCP_ADDR, 'port': process.env.STAGING_PORT_3000_TCP_PORT, 'latency': 0 } );
 
-var appNode = { 'port': 3080, 'latency': 0 };
+var appNode = {'addr': 'localhost', 'port': 3000, 'latency': 0 };
 
 ///////////////
 //// Broadcast heartbeat over websockets
