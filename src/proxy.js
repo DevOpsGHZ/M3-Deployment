@@ -22,6 +22,7 @@ var infrastructure =
 //    client.lpush('servers', instance1);
 //    client.lpush('servers', instance2);
 //    client.ltrim('servers', 0, 1);
+    client.set("percent", 0.7);
     var options = {};
     var proxy   = httpProxy.createProxyServer(options);
 
@@ -34,14 +35,17 @@ var infrastructure =
         }
         else
         {
-          var p = Math.random();
-          if( p < 0.7) {
-            proxy.web( req, res, {target: instance1 } );  
-          }
-          else
-          {
-            proxy.web( req, res, {target: instance2 } );   
-          }
+          client.get("percent", function(err, rep){
+            var p = Math.random();
+            if( p < Number(rep) ) {
+              proxy.web( req, res, {target: instance1 } );  
+            }
+            else
+            {
+              proxy.web( req, res, {target: instance2 } );   
+            }
+          });
+          
         }
       });
       
