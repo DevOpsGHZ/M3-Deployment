@@ -103,6 +103,7 @@ $(document).ready( function()
             latency: client.latency,
             nodes:client.nodes 
         });
+        // alert
         if(client.latency > 10)
             $.get("http://127.0.0.1:7379/SET/key/value123");
     });

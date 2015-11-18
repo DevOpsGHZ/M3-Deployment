@@ -7,8 +7,13 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET Hello World page. */
-router.get('/helloworld', function(req, res) {
-    res.render('helloworld', { title: 'Hello, World!' });
+router.get('/manage', function(req, res) {
+    res.render('manage', { title: 'Feature Management' });
 });
+//router.get('/feature', function(req, res) {
+    //res.render('feature', { title: 'Feature' });
+//});
+
+
 
 module.exports = router;

@@ -1,0 +1,12 @@
+FROM ubuntu:14.04
+MAINTAINER Kelei Gong, kgong@ncsu.edu
+
+RUN apt-get update
+RUN apt-get -y install git
+RUN apt-get -y install nodejs
+RUN apt-get -y install npm
+COPY ./M3-Deployment/src /src
+RUN cd /src; npm install
+EXPOSE 3000
+WORKDIR /src
+CMD ["nodejs", "app.js"]

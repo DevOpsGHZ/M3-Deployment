@@ -1,0 +1,77 @@
+---
+- hosts: server 
+  tasks:
+    - name: Create staging directory
+      file: state=directory path=~/staging
+
+    - name: Upload Dockefile
+      copy: src=stage-Dockerfile dest=~/staging/Dockerfile
+
+    - stat: path=~/staging/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone -b dev --single-branch https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/staging
+
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/staging/M3-Deployment
+    
+   # - name: Tag the old image
+   #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
+   #   sudo: yes
+
+   # - name: Build Dockerfile
+   #   docker_image: path="/home/ubuntu/M3-Deployment" name="sample-app" state=build
+   #   sudo: yes
+    - name: Redis container
+      docker:
+        name: myredis
+        image: redis
+        command: redis-server --appendonly yes
+        state: started
+        expose:
+          - 6379
+        docker_api_version: 1.18
+      sudo: yes
+
+    - name: Build
+      command: docker build -t staging-app .
+      args:
+        chdir: /home/ubuntu/staging
+      sudo: yes
+
+    - name: Tag
+      command: docker tag -f staging-app localhost:5000/sample:staging
+      sudo: yes
+   
+    - name: push
+      command: docker push localhost:5000/sample:staging
+      sudo: yes
+    
+    - name: stop staging-app
+      command: docker rm -f staging-app
+      sudo: yes
+      ignore_errors: yes
+
+    - name: Deploy staging App 
+      docker:
+        name: staging-app
+        image: localhost:5000/sample:staging
+        registry: localhost:5000
+        state: restarted
+        pull: always
+        links:
+          - "myredis:redis"
+        ports:
+          - 3002:3000
+        docker_api_version: 1.18
+      sudo: yes
+   # - name: run
+   #   command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
+   #   sudo: yes 

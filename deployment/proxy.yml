@@ -1,0 +1,81 @@
+---
+- hosts: server 
+  tasks:
+    - name: Create proxy directory
+      file: state=directory path=~/proxy
+
+    - name: Upload Dockefile
+      copy: src=proxy-Dockerfile dest=~/proxy/Dockerfile
+    
+    - stat: path=~/proxy/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/proxy
+
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/proxy/M3-Deployment
+    
+   # - name: Tag the old image
+   #   command: docker tag localhost:5000/sample:latest localhost:5000/sample:previous
+   #   sudo: yes
+
+   # - name: Build Dockerfile
+   #   docker_image: path="/home/ubuntu/M3-Deployment" name="sample-app" state=build
+   #   sudo: yes
+    - name: Redis container
+      docker:
+        name: myredis
+        image: redis
+        command: redis-server --appendonly yes
+        state: started
+        expose:
+          - 6379
+        docker_api_version: 1.18
+      sudo: yes
+
+    - name: Build
+      command: docker build -t proxy .
+      args:
+        chdir: /home/ubuntu/proxy
+      sudo: yes
+
+    - name: Tag
+      command: docker tag -f proxy localhost:5000/sample:proxy
+      sudo: yes
+   
+    - name: push
+      command: docker push localhost:5000/sample:proxy
+      sudo: yes
+    
+    - name: stop proxy 
+      command: docker rm -f proxy
+      sudo: yes
+      ignore_errors: yes
+
+    - name: Deploy proxy 
+      docker:
+        name: proxy 
+        image: localhost:5000/sample:proxy
+        registry: localhost:5000
+        state: restarted
+        pull: always
+        links:
+          - "myredis:redis"
+          - "app:production"
+          - "staging-app:staging"
+        ports:
+          - 3000:3000
+          - 3001:3001
+          - 3002:3002
+        docker_api_version: 1.18
+      sudo: yes
+   # - name: run
+   #   command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
+   #   sudo: yes 
