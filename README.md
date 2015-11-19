@@ -267,6 +267,9 @@ When we are deplyoing to the production server, all the traffic will be routed t
 
 The proxy will route all the traffic to another stable server and send an email to notify the developer. The email fucntion is implement using package [nodemailer](https://github.com/andris9/Nodemailer).
 
+![image](images/alert.png)
+
+
 ###Canary releasing:
 To perform canary release, we use three port to mock different servers. Port 3000 for entering the proxy, 3001 for production and 3002 for staging server. 
     
