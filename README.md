@@ -32,22 +32,112 @@ If we want to deploy the production app, we can use command
     ansible-playbook -i inventory deployment/production.yml
  
 Basically, in the `production.yml` playbook it will do:
-* Clone/pull the repository that has the app and keep it up-to-date 
-* Run Redis in container from Redis image
-* Build image then run the container for the production app
-* Link the app container and the Redis container
-* Restart production app.
+* Upload the Dockerfile to create the image for sample app
+
+
+```
+    - name: Create production directory
+      file: state=directory path=~/production
+
+    - name: Upload Dockefile
+      copy: src=prod-Dockerfile dest=~/production/Dockerfile
+```   
+* Clone/pull the repository that has the sample app and keep it up-to-date:
+
+```
+    - stat: path=~/production/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/production
+
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/production/M3-Deployment
+```
+
+* Run Redis container from Redis image
+
+```    
+       - name: Redis container
+      docker:
+        name: myredis
+        image: redis
+        command: redis-server --appendonly yes
+        state: started
+        expose:
+          - 6379
+        docker_api_version: 1.18
+      sudo: yes
+```
+
+* Build image then run the container for the sample app
+
+```
+    - name: Build
+      command: docker build -t sample-app .
+      args:
+        chdir: /home/ubuntu/production
+      sudo: yes
+      
+
+```
+
+* Give the image a tag call 'production'
+
+
+```
+
+    - name: Tag
+      command: docker tag -f sample-app localhost:5000/sample:production
+      sudo: yes
+   
+    - name: push
+      command: docker push localhost:5000/sample:production
+      sudo: yes
+
+```
+
+* Restart app
+  
+```
+
+    - name: stop app
+      command: docker rm -f app
+      sudo: yes
+      ignore_errors: yes
+
+    - name: App
+      docker:
+        name: app
+        image: localhost:5000/sample:production
+        registry: localhost:5000
+        state: restarted
+        pull: always
+        links:
+          - "myredis:redis"
+        ports:
+          - 3001:3000
+        docker_api_version: 1.18
+      sudo: yes
+
+```
 
 ![image](images/ansible.png)
 The playbook `staging.yml` is for deploy staging app, it will clone/pull code from the `dev` branch.
- And `proxy.yml` is for deploy the proxy/monitor app. The proxy app will be deployed in a separate container, and it will reach to other apps by defining `links`:
+ And `proxy.yml` is for deploy the proxy/monitor app. The proxy app will be deployed in a separate container, and it will reach to other apps by defining `links`. The connections between apps and Redis server are also achieved in this way.
  ```
  links:
           - "myredis:redis"
           - "app:production"
           - "staging-app:staging"
  ```
-The connections between apps and Redis server are also achieved in this way.
+
 
 
 When build the app image, we use a Dockerfile like this:
@@ -89,125 +179,6 @@ EXPOSE 8080
 WORKDIR /src
 CMD ["node", "proxy.js"]
 ```
-
-Use production.yml through command  `ansible-playbook production.yml -i inventory`  to do following tasks.
- 
-
-* upload the Dockerfile to create the image for sample app
-
-
-```
-
-    - name: Create production directory
-      file: state=directory path=~/production
-
-    - name: Upload Dockefile
-      copy: src=prod-Dockerfile dest=~/production/Dockerfile
-
-```
-
-      
-* Clone the repository that has the sample app and keep it up-to-date:
-
-```
-    
-    - stat: path=~/production/M3-Deployment
-      register: repo_exist
-    
-    - name: Git clone
-      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
-      when: repo_exist.stat.exists == False
-      args:
-        chdir: ~/production
-
-    - name: Git pull
-      command: git pull
-      when: repo_exist.stat.exists == True
-      args:
-        chdir: ~/production/M3-Deployment
-
-```
-
-* Run redis container from exiting redis image
-
-    
-   
-```
-    
-       - name: Redis container
-      docker:
-        name: myredis
-        image: redis
-        command: redis-server --appendonly yes
-        state: started
-        expose:
-          - 6379
-        docker_api_version: 1.18
-      sudo: yes
-
-
-```
-
-* Build image then run the container for the sample app
-
-
-```
-
-    - name: Build
-      command: docker build -t sample-app .
-      args:
-        chdir: /home/ubuntu/production
-      sudo: yes
-      
-
-```
-
-* Give the image a tag call 'production'
-
-
-```
-
-    - name: Tag
-      command: docker tag -f sample-app localhost:5000/sample:production
-      sudo: yes
-   
-    - name: push
-      command: docker push localhost:5000/sample:production
-      sudo: yes
-
-```
-
-* Link the sample app container and the redis container
-
-    
-```
-
-    - name: stop app
-      command: docker rm -f app
-      sudo: yes
-      ignore_errors: yes
-
-    - name: App
-      docker:
-        name: app
-        image: localhost:5000/sample:production
-        registry: localhost:5000
-        state: restarted
-        pull: always
-        links:
-          - "myredis:redis"
-        ports:
-          - 3001:3000
-        docker_api_version: 1.18
-      sudo: yes
-
-```
-
-
-
-####Sample app image:
-
-
 
 ###Feature Flags
 
