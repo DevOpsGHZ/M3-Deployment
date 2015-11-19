@@ -21,7 +21,7 @@ ansible playbook `provision.yml` to do the automatic configuration, including in
 It will configure the server to be ready for deploying.
 
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.   
 ![test](images/testanalysis.gif)
 
 
@@ -280,7 +280,7 @@ function sendMail()
 
 ```
 
-When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server. This is achieved by modifying the value `route` in the Redis server.
+When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server. This is achieved by modifying the value of key `route` in the Redis server.
 
 
 ![image](images/alert.png)
