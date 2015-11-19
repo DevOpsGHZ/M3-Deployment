@@ -21,7 +21,10 @@ ansible playbook `provision.yml` to do the automatic configuration, including in
 It will configure the server to be ready for deploying.
 
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in post-commit.sh.
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.
+![test](images/testanalysis.gif)
+
+
 
 ####3. Deployment:
 We deploy our app by using Docker, in total we use 4 containers, one for the production app, one for 
@@ -237,7 +240,7 @@ app.get('/feature',function(req,res){
 });
 
 ```
-3. Demo
+####3. Demo
 ![featureflag](images/featureflag.gif)
 
 
@@ -254,13 +257,15 @@ For convenience, the monitor program is merged into the proxy program so they sh
 
 We have two servers, namely staging server and production server. Initially, the proxy will route 80% traffic to production server, 20% to staging server.
 
-If any of the below hehaviors are detected on a server, the proxy will route all the traffic to another stable server and send an email to notify the developer:
+If any of the below hehaviors are detected on a server:
 
 * cpu > 50%
 * mem > 90%
 * latency > 400ms
 
 When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server. This is achieved by modifying the value `route` in the Redis server.
+
+The proxy will route all the traffic to another stable server and send an email to notify the developer. The email fucntion is implement using package [nodemailer](https://github.com/andris9/Nodemailer).
 
 ###Canary releasing:
 To perform canary release, we use three port to mock different servers. Port 3000 for entering the proxy, 3001 for production and 3002 for staging server. 
