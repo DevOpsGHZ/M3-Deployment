@@ -2,8 +2,13 @@
 
 ### Structure:
 
+
 ![srtucture](images/structure.jpg)
 
+### URL: 
+[proxy](54.175.23.6:3000)   
+[production](54.175.23.6:3001)    
+[staging](54.175.23.6:3002)   
 
 
 ###Configuration and deployment:
