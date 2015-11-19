@@ -5,20 +5,131 @@
 ####1. Automatic configuration:
 Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
 `ansible-playbook provision.yml -i inventory`
-####2. Deployment:
-Use production.yml through command  `ansible-playbook production.yml -i inventory` to
+####2.Test and analysis:
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use following mocha and supertest module to do unit test and Jshint to do analysis.
+
+####3. Deployment:
+Use production.yml through command  `ansible-playbook production.yml -i inventory`  to do following tasks.
  
-* Clone the repository that has the sample app and keep it up-to-date
-* Build image then run the container for the sample app 
-* Run redis container from exiting redis image
-* Link the sample app container and the redis container
 
+* upload the Dockerfile to create the image for sample app
 
-
- 
- Sample app image:
 
 ```
+
+    - name: Create production directory
+      file: state=directory path=~/production
+
+    - name: Upload Dockefile
+      copy: src=prod-Dockerfile dest=~/production/Dockerfile
+
+```
+
+      
+* Clone the repository that has the sample app and keep it up-to-date:
+
+```
+    
+    - stat: path=~/production/M3-Deployment
+      register: repo_exist
+    
+    - name: Git clone
+      command: git clone https://github.com/DevOpsGHZ/M3-Deployment
+      when: repo_exist.stat.exists == False
+      args:
+        chdir: ~/production
+
+    - name: Git pull
+      command: git pull
+      when: repo_exist.stat.exists == True
+      args:
+        chdir: ~/production/M3-Deployment
+
+```
+
+* Run redis container from exiting redis image
+
+    
+   
+```
+    
+       - name: Redis container
+      docker:
+        name: myredis
+        image: redis
+        command: redis-server --appendonly yes
+        state: started
+        expose:
+          - 6379
+        docker_api_version: 1.18
+      sudo: yes
+
+
+```
+
+* Build image then run the container for the sample app
+
+
+```
+
+    - name: Build
+      command: docker build -t sample-app .
+      args:
+        chdir: /home/ubuntu/production
+      sudo: yes
+      
+
+```
+
+* Give the image a tag call 'production'
+
+
+```
+
+    - name: Tag
+      command: docker tag -f sample-app localhost:5000/sample:production
+      sudo: yes
+   
+    - name: push
+      command: docker push localhost:5000/sample:production
+      sudo: yes
+
+```
+
+* Link the sample app container and the redis container
+
+    
+```
+
+    - name: stop app
+      command: docker rm -f app
+      sudo: yes
+      ignore_errors: yes
+
+    - name: App
+      docker:
+        name: app
+        image: localhost:5000/sample:production
+        registry: localhost:5000
+        state: restarted
+        pull: always
+        links:
+          - "myredis:redis"
+        ports:
+          - 3001:3000
+        docker_api_version: 1.18
+      sudo: yes
+
+
+```
+
+
+
+####Sample app image:
+
+
+```
+
 FROM ubuntu:14.04
 MAINTAINER Kelei Gong, kgong@ncsu.edu
 
@@ -32,7 +143,12 @@ EXPOSE 3000
 WORKDIR /src
 CMD ["nodejs", "app.js"]
 
+
 ```
+
+
+
+
 
 
 
