@@ -6,10 +6,10 @@
 ![srtucture](images/structure.jpg)
 
 ### URL: 
-[proxy](http://54.175.23.6:3000)   
-[production](http://54.175.23.6:3001)    
-[staging](http://54.175.23.6:3002)   
-
+[Proxy](http://54.175.23.6:3000)   
+[Production](http://54.175.23.6:3001)    
+[Staging](http://54.175.23.6:3002)   
+[Monitor](http://54.175.23.6:8080)
 
 ###Configuration and deployment:
 ####1. Automatic configuration:
