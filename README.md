@@ -260,7 +260,7 @@ We have two servers, namely staging server and production server. Initially, the
 If any of the below hehaviors are detected on a server:
 
 * cpu > 50%
-* mem > 90%
+* mem > 95%
 * latency > 400ms
 
 
