@@ -65,16 +65,7 @@ var NodeModel = function(node) {
 var viewModel = new StatusModel(
 [
     { 
-        name: "Fake Client", cpu: "39.95", memoryLoad: "40", latency: "10",
-        nodes: 
-        [
-            {color:"#00ff00"},
-            {color:"#cccc00"},
-            {color:"#cccc00"}
-        ]
-    },
-    { 
-        name: "Your Computer", cpu: "0.00", memoryLoad: "0", latency: "0",
+        name: "Server", cpu: "0.00", memoryLoad: "0", latency: "0",
         nodes: 
         [
             {color:"#ab3fdd"},
@@ -90,7 +81,7 @@ $(document).ready( function()
     ko.applyBindings(viewModel);
     $('#statusTable').DataTable( { "paging":   false, "info":     false });
 
-    var socket = io.connect('http://54.175.23.6:3000');
+    var socket = io.connect('http://localhost:3000');
 
     socket.on("heartbeat", function(client) 
     {
