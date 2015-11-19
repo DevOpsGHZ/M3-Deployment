@@ -229,11 +229,13 @@ For convenience, the monitor program is merged into the proxy program so they sh
 
 We have two servers, namely staging server and production server. Initially, the proxy will route 80% traffic to production server, 20% to staging server.
 
-If any of the below hehaviors are detected on a server, the proxy will route all the traffic to another stable server and send an email to notify the developer:
+If any of the below hehaviors are detected on a server:
 
 * cpu > 50%
 * mem > 90%
 * latency > 400ms
+
+The proxy will route all the traffic to another stable server and send an email to notify the developer. The email fucntion is implement using package [nodemailer](https://github.com/andris9/Nodemailer).
 
 When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server.
 
