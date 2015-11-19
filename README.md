@@ -3,21 +3,40 @@
 
 ###Configuration and deployment:
 ####1. Automatic configuration:
-Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
-`ansible-playbook provision.yml -i inventory`
+We use the technics from [HW1](https://github.com/DevOpsHW/DevOps-HW1) to launch a AWS instance, create the `inventory` file, and then use an 
+ansible playbook `provision.yml` to do the automatic configuration, including install Git, curl, Docker, pip, docker-py:     
+
+    ansible-playbook -i inventory deployment/provision.yml
+
+It will configure the server to be ready for deploying.
 ####2. Deployment:
-Use production.yml through command  `ansible-playbook production.yml -i inventory` to
+We deploy our app by using Docker, in total we use 4 containers, one for the production app, one for 
+the staging app, one for the proxy/monitor and the last one for the Redis server. 
+
+If we want to deploy the production app, we can use command  
+    
+    ansible-playbook -i inventory deployment/production.yml
  
-* Clone the repository that has the sample app and keep it up-to-date
-* Build image then run the container for the sample app 
-* Run redis container from exiting redis image
-* Link the sample app container and the redis container
+Basically, in the `production.yml` playbook it will do:
+* Clone/pull the repository that has the app and keep it up-to-date 
+* Run Redis in container from Redis image
+* Build image then run the container for the production app
+* Link the app container and the Redis container
+* Restart production app.
+
+![image](images/ansible.png)
+The playbook `staging.yml` is for deploy staging app, it will clone/pull code from the `dev` branch.
+ And `proxy.yml` is for deploy the proxy/monitor app. The proxy app will be deployed in a separate container, and it will reach to other apps by defining `links`:
+ ```
+ links:
+          - "myredis:redis"
+          - "app:production"
+          - "staging-app:staging"
+ ```
+The connections between apps and Redis server are also achieved in this way.
 
 
-
- 
- Sample app image:
-
+When build the app image, we use a Dockerfile like this:
 ```
 FROM ubuntu:14.04
 MAINTAINER Kelei Gong, kgong@ncsu.edu
@@ -31,14 +50,30 @@ RUN cd /src; npm install
 EXPOSE 3000
 WORKDIR /src
 CMD ["nodejs", "app.js"]
-
 ```
 
+For each app we have a different Dockerfile, to complete some specified build tasks based on the different situations. Like in the Dockerfile for proxy app, we use another verison of Node, as the `heartbeat` seems not working in the latest Node version.
 
+```
+FROM ubuntu:14.04
+MAINTAINER Kelei Gong, kgong@ncsu.edu
 
-
-
-
+RUN apt-get update
+RUN apt-get -y install git
+RUN apt-get -y install nodejs
+RUN apt-get -y install nodejs-legacy
+RUN apt-get -y install npm
+RUN apt-get -y install wget
+COPY ./M3-Deployment/src /src
+RUN npm install n -g
+RUN n 0.10.33
+RUN cd /src; npm install
+RUN npm install http-server -g
+EXPOSE 3000
+EXPOSE 8080
+WORKDIR /src
+CMD ["node", "proxy.js"]
+```
 ###Feature Flags
 
 ####1. UI guide
