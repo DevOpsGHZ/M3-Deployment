@@ -333,3 +333,5 @@ When doing the routing, the server will get the value of `route` from Redis serv
  
 After we deploying a Staging app, the Ansible playbook will change the `route` value in Redis server to 0, so the proxy will do the routing in 8:2. 
 
+
+Here is a [demo](https://drive.google.com/file/d/0B87f7178bIHnU1pPb19ROTNUYkk/view?usp=sharing) for the Canary release, combined with a Alert raise case.
