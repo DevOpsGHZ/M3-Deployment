@@ -54,6 +54,9 @@
       command: docker push localhost:5000/sample:staging
       sudo: yes
     
+    - name: Route all traffic to another app
+      command: echo set route 1 | redis-cli -h 172.17.0.3
+
     - name: stop staging-app
       command: docker rm -f staging-app
       sudo: yes
@@ -72,6 +75,9 @@
           - 3002:3000
         docker_api_version: 1.18
       sudo: yes
+    
+    - name: Canary routing
+      command: echo set route 0 | redis-cli -h 172.17.0.3
    # - name: run
    #   command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
    #   sudo: yes 
