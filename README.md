@@ -1,12 +1,17 @@
 # M3-Deployment
 
+### Structure:
+
+![srtucture](images/structure.jpg)
+
+
 
 ###Configuration and deployment:
 ####1. Automatic configuration:
 Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
 `ansible-playbook provision.yml -i inventory`
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use following mocha and supertest module to do unit test and Jshint to do analysis.
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in post-commit.sh.
 
 ####3. Deployment:
 Use production.yml through command  `ansible-playbook production.yml -i inventory`  to do following tasks.
@@ -254,6 +259,3 @@ var server  = http.createServer(function(req, res)
 
 ```
 
-#### Structure:
-
-![srtucture](images/structure.jpg)
