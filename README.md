@@ -1,53 +1,35 @@
 # M3-Deployment
 
-### Structure:
-
-
-![srtucture](images/structure.jpg)
-
-### URL: 
-[Proxy](http://54.175.23.6:3000)   
-[Production](http://54.175.23.6:3001)    
-[Staging](http://54.175.23.6:3002)   
-[Monitor](http://54.175.23.6:8080)
 
 ###Configuration and deployment:
 ####1. Automatic configuration:
-We use the technics from [HW1](https://github.com/DevOpsHW/DevOps-HW1) to launch a AWS instance, create the `inventory` file, and then use an 
-ansible playbook `provision.yml` to do the automatic configuration, including install Git, curl, Docker, pip, docker-py:     
-
-    ansible-playbook -i inventory deployment/provision.yml
-
-It will configure the server to be ready for deploying.
-
+Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
+`ansible-playbook provision.yml -i inventory`
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.
-![test](images/testanalysis.gif)
-
-
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use following mocha and supertest module to do unit test and Jshint to do analysis.
 
 ####3. Deployment:
-We deploy our app by using Docker, in total we use 4 containers, one for the production app, one for 
-the staging app, one for the proxy/monitor and the last one for the Redis server. 
-
-If we want to deploy the production app, we can use command  
-    
-    ansible-playbook -i inventory deployment/production.yml
+Use production.yml through command  `ansible-playbook production.yml -i inventory`  to do following tasks.
  
-Basically, in the `production.yml` playbook it will do:
-* Upload the Dockerfile to create the image for sample app
+
+* upload the Dockerfile to create the image for sample app
 
 
 ```
+
     - name: Create production directory
       file: state=directory path=~/production
 
     - name: Upload Dockefile
       copy: src=prod-Dockerfile dest=~/production/Dockerfile
-```   
-* Clone/pull the repository that has the sample app and keep it up-to-date:
 
 ```
+
+      
+* Clone the repository that has the sample app and keep it up-to-date:
+
+```
+    
     - stat: path=~/production/M3-Deployment
       register: repo_exist
     
@@ -62,11 +44,15 @@ Basically, in the `production.yml` playbook it will do:
       when: repo_exist.stat.exists == True
       args:
         chdir: ~/production/M3-Deployment
+
 ```
 
-* Run Redis container from Redis image
+* Run redis container from exiting redis image
 
-```    
+    
+   
+```
+    
        - name: Redis container
       docker:
         name: myredis
@@ -77,11 +63,15 @@ Basically, in the `production.yml` playbook it will do:
           - 6379
         docker_api_version: 1.18
       sudo: yes
+
+
 ```
 
 * Build image then run the container for the sample app
 
+
 ```
+
     - name: Build
       command: docker build -t sample-app .
       args:
@@ -106,8 +96,9 @@ Basically, in the `production.yml` playbook it will do:
 
 ```
 
-* Restart app
-  
+* Link the sample app container and the redis container
+
+    
 ```
 
     - name: stop app
@@ -129,23 +120,16 @@ Basically, in the `production.yml` playbook it will do:
         docker_api_version: 1.18
       sudo: yes
 
-```
-
-![image](images/ansible.png)
-The playbook `staging.yml` is for deploy staging app, it will clone/pull code from the `dev` branch.
- And `proxy.yml` is for deploy the proxy/monitor app. The proxy app will be deployed in a separate container, and it will reach to other apps by defining `links`. The connections between apps and Redis server are also achieved in this way.
- ```
- links:
-          - "myredis:redis"
-          - "app:production"
-          - "staging-app:staging"
- ```
-
-
-
-When build the app image, we use a Dockerfile like this:
 
 ```
+
+
+
+####Sample app image:
+
+
+```
+
 FROM ubuntu:14.04
 MAINTAINER Kelei Gong, kgong@ncsu.edu
 
@@ -158,30 +142,18 @@ RUN cd /src; npm install
 EXPOSE 3000
 WORKDIR /src
 CMD ["nodejs", "app.js"]
-```
 
-For each app we have a different Dockerfile, to complete some specified build tasks based on the different situations. Like in the Dockerfile for proxy app, we use another verison of Node, as the `heartbeat` seems not working in the latest Node version.
 
 ```
-FROM ubuntu:14.04
-MAINTAINER Kelei Gong, kgong@ncsu.edu
 
-RUN apt-get update
-RUN apt-get -y install git
-RUN apt-get -y install nodejs
-RUN apt-get -y install nodejs-legacy
-RUN apt-get -y install npm
-RUN apt-get -y install wget
-COPY ./M3-Deployment/src /src
-RUN npm install n -g
-RUN n 0.10.33
-RUN cd /src; npm install
-RUN npm install http-server -g
-EXPOSE 3000
-EXPOSE 8080
-WORKDIR /src
-CMD ["node", "proxy.js"]
-```
+
+
+
+
+
+
+
+
 
 ###Feature Flags
 
@@ -240,7 +212,7 @@ app.get('/feature',function(req,res){
 });
 
 ```
-####3. Demo
+3. Demo
 ![featureflag](images/featureflag.gif)
 
 
@@ -302,3 +274,6 @@ var server  = http.createServer(function(req, res)
 
 ```
 
+#### Structure:
+
+![srtucture](images/structure.jpg)
