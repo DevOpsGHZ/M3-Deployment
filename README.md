@@ -231,18 +231,26 @@ app.get('/feature',function(req,res){
 ###Metrics and alerts:
 To monitor the server, three metrics are used: CPU, Mem and Latency.
 
-For convenience, the monitor program is merged into the proxy program so they share the port 3000. The corresponding html report is live on port 8080.
-
-Once the latency is larger that 400 ms, the proxy will stop routing to that node and send an email to notify the developer.
-
 Using the script `siege -b -t60s http://localhost:3001`, we are able to create a high latency.
 
 ![latency](images/latency.png)
 
+For convenience, the monitor program is merged into the proxy program so they share the port 3000. The corresponding html report is live on port 8080.
+
+We have two servers, namely staging server and production server. Initially, the proxy will route 80% traffic to production server, 20% to staging server.
+
+If any of the below hehaviors are detected on a server, the proxy will route all the traffic to another stable server and send an email to notify the developer:
+
+* cpu > 50%
+* mem > 90%
+* latency > 400ms
+
+When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server.
+
 ###Canary releasing:
 To perform canary release, we use three port to mock different servers. Port 3000 for proxy, 3001 for production and 3002 for staging server. 
     
-With the probablity of 70%, the proxy server will route traffic to production server, and 30% to the staging server. If alert arise, the proxy will stop routing.
+With the probablity of 80%, the proxy server will route traffic to production server, and 20% to the staging server. If alert arise, the proxy will stop routing.
 
 Relavent code in proxy.js:
 
