@@ -21,7 +21,10 @@ ansible playbook `provision.yml` to do the automatic configuration, including in
 It will configure the server to be ready for deploying.
 
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in post-commit.sh.
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.
+![test](images/testanalysis.gif)
+
+
 
 ####3. Deployment:
 We deploy our app by using Docker, in total we use 4 containers, one for the production app, one for 
@@ -237,7 +240,7 @@ app.get('/feature',function(req,res){
 });
 
 ```
-3. Demo
+####3. Demo
 ![featureflag](images/featureflag.gif)
 
 
