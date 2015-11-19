@@ -6,10 +6,9 @@ var request = require("request");
 var os = require("os");
 var nodemailer = require('nodemailer');
 // var client = redis.createClient(6379, '127.0.0.1', {})
-// var instance1 = 'http://127.0.0.1:3000';
-// var instance2  = 'http://127.0.0.1:3030';
+// var instance1 = 'http://127.0.0.1:3030';
+// var instance2  = 'http://127.0.0.1:3060';
 var client = redis.createClient(process.env.REDIS_PORT_6379_TCP_PORT,process.env.REDIS_PORT_6379_TCP_ADDR, {})
-
 var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
 var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
 // var TARGET = BLUE;
@@ -127,6 +126,7 @@ function memoryLoad()
   if(load > 90)
   {
     client.set("route", 1);
+    sendMail();
   }
   // if(load < 70)
   // {
@@ -175,6 +175,7 @@ function cpuAverage()
   if(usage > 50)
   {
     client.set("route", 1);
+    sendMail();
   }
   // if( usage <)
 
@@ -194,17 +195,10 @@ function measureLatenancy(node)
   {
     node.latency = Date.now() - startTime;
   });
-  if(node.latency > 1000)
+  if(node.latency > 400)
   {
     client.set("route", 1);
-
-    var transporter = nodemailer.createTransport();
-    transporter.sendMail({
-    from: 'automail@DevOpsGHZ.com',
-    to: 'kgong@ncsu.edu',
-    subject: 'High Latency Detected',
-    text: 'High latency detected in server ' + options.url
-    });
+    sendMail();
   }
   return node.latency;
 }
@@ -217,19 +211,19 @@ function calcuateColor()
     var color = "#cccccc";
     if( !latency )
       return {color: color};
-    if( latency > 8000 )
+    if( latency > 500 )
     {
       color = "#ff0000";
     }
-    else if( latency > 4000 )
+    else if( latency > 400 )
     {
       color = "#cc0000";
     }
-    else if( latency > 2000 )
+    else if( latency > 300 )
     {
       color = "#ffff00";
     }
-    else if( latency > 1000 )
+    else if( latency > 200 )
     {
       color = "#cccc00";
     }
@@ -263,7 +257,7 @@ setInterval( function ()
 {
   io.sockets.emit('heartbeat', 
   { 
-        name: "Your Computer", cpu: cpuAverage(), memoryLoad: memoryLoad(), latency: measureLatenancy(appNode),
+        name: "Server", cpu: cpuAverage(), memoryLoad: memoryLoad(), latency: measureLatenancy(appNode),
         nodes: calcuateColor()
    });
 
@@ -284,4 +278,15 @@ function createServer(port, fn)
       res.end();
    }).listen(port);
   nodeServers.push( appNode );
+}
+
+function sendMail()
+{
+    var transporter = nodemailer.createTransport();
+    transporter.sendMail({
+    from: 'automail@DevOpsGHZ.com',
+    to: 'kgong@ncsu.edu',
+    subject: 'abnomal behavior on sever',
+    text: 'abnomal behavior on sever'
+    });
 }
