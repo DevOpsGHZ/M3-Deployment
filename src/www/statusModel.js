@@ -81,7 +81,7 @@ $(document).ready( function()
     ko.applyBindings(viewModel);
     $('#statusTable').DataTable( { "paging":   false, "info":     false });
 
-    var socket = io.connect('http://localhost:3000');
+    var socket = io.connect('http://54.175.23.6:3000');
 
     socket.on("heartbeat", function(client) 
     {
