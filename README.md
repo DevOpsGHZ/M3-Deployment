@@ -6,7 +6,7 @@
 ![srtucture](images/structure.jpg)
 
 ### URL: 
-[Proxy](http://54.175.23.6:3000)   
+[App entrance](http://54.175.23.6:3000) (It will route the traffic to Production or Staging)    
 [Production](http://54.175.23.6:3001)    
 [Staging](http://54.175.23.6:3002)   
 [Monitor](http://54.175.23.6:8080)
@@ -260,10 +260,10 @@ If any of the below hehaviors are detected on a server, the proxy will route all
 * mem > 90%
 * latency > 400ms
 
-When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server.
+When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server. This is achieved by modifying the value `route` in the Redis server.
 
 ###Canary releasing:
-To perform canary release, we use three port to mock different servers. Port 3000 for proxy, 3001 for production and 3002 for staging server. 
+To perform canary release, we use three port to mock different servers. Port 3000 for entering the proxy, 3001 for production and 3002 for staging server. 
     
 With the probablity of 80%, the proxy server will route traffic to production server, and 20% to the staging server. If alert arise, the proxy will stop routing.
 
@@ -271,29 +271,41 @@ Relavent code in proxy.js:
 
 ```
 var instance1 = 'http://' + process.env.PRODUCTION_PORT_3000_TCP_ADDR + ':' + process.env.PRODUCTION_PORT_3000_TCP_PORT;
- var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
+var instance2 = 'http://' + process.env.STAGING_PORT_3000_TCP_ADDR + ':' + process.env.STAGING_PORT_3000_TCP_PORT;
 
-
+client.set("percent", 0.8);
 
 var server  = http.createServer(function(req, res)
-{
-     client.get("route",function(err, reply) {
-        if(reply == 0 || reply == null)
+    {
+      client.get("route",function(err, reply) {
+        if(reply == 1 || reply == null)
         {
           proxy.web( req, res, {target: instance1 } );  
         }
+        else if(reply == 2)
+        {
+          proxy.web( req, res, {target: instance2 } );  
+        }
         else
         {
-          var p = Math.random();
-          if( p < 0.7) {
-            proxy.web( req, res, {target: instance1 } );  
-          }
-          else
-          {
-            proxy.web( req, res, {target: instance2 } );   
-          }
+          client.get("percent", function(err, rep){
+            var p = Math.random();
+            if( p < Number(rep) ) {
+              proxy.web( req, res, {target: instance1 } );  
+            }
+            else
+            {
+              proxy.web( req, res, {target: instance2 } );   
+            }
+          });
+          
         }
-});
+      });
 
 ```
+
+When doing the routing, the server will get the value of `route` from Redis server, if it's 1, then route all traffic to Production app,
+ if it's 2, route to staging app, and if it's 0, then do the routing in a 8:2 (default ratio) way. The percentage can be set through changing the value for `percent` in Redis server. 
+ 
+After we deploying a Staging app, the Ansible playbook will change the `route` value in Redis server to 0, so the proxy will do the routing in 8:2. 
 
