@@ -22,16 +22,20 @@ var infrastructure =
 //    client.lpush('servers', instance1);
 //    client.lpush('servers', instance2);
 //    client.ltrim('servers', 0, 1);
-    client.set("percent", 0.7);
+    client.set("percent", 0.8);
     var options = {};
     var proxy   = httpProxy.createProxyServer(options);
 
     var server  = http.createServer(function(req, res)
     {
       client.get("route",function(err, reply) {
-        if(reply == 0 || reply == null)
+        if(reply == 1 || reply == null)
         {
           proxy.web( req, res, {target: instance1 } );  
+        }
+        else if(reply == 2)
+        {
+          proxy.web( req, res, {target: instance2 } );  
         }
         else
         {
@@ -121,7 +125,7 @@ function memoryLoad()
   var load = ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
   if(load > 90)
   {
-    client.set("route", 0);
+    client.set("route", 1);
     sendMail();
   }
   // if(load < 70)
@@ -170,7 +174,7 @@ function cpuAverage()
   var usage = ~~ ( 100 * (totalDifference - idleDifference) / totalDifference );
   if(usage > 50)
   {
-    client.set("route", 0);
+    client.set("route", 1);
     sendMail();
   }
   // if( usage <)
@@ -193,8 +197,7 @@ function measureLatenancy(node)
   });
   if(node.latency > 400)
   {
-    client.set("route", 0);
-
+    client.set("route", 1);
     sendMail();
   }
   return node.latency;
