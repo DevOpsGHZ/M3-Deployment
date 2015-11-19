@@ -263,7 +263,21 @@ If any of the below hehaviors are detected on a server:
 * mem > 90%
 * latency > 400ms
 
-The proxy will route all the traffic to another stable server and send an email to notify the developer. The email fucntion is implement using package [nodemailer](https://github.com/andris9/Nodemailer).
+The proxy will route all the traffic to another stable server and send an email to notify the developer. The email fucntion is implement using package [nodemailer](https://github.com/andris9/Nodemailer), the receiver is set up after `to:`
+
+```
+function sendMail()
+{
+    var transporter = nodemailer.createTransport();
+    transporter.sendMail({
+    from: 'automail@DevOpsGHZ.com',
+    to: 'kgong@ncsu.edu',
+    subject: 'abnomal behavior on sever',
+    text: 'abnomal behavior on sever'
+    });
+}
+
+```
 
 When we are deplyoing to the production server, all the traffic will be routed to staging server. After that 80% of the traffic will be routed to production server.
 
