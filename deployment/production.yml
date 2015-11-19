@@ -53,7 +53,10 @@
     - name: push
       command: docker push localhost:5000/sample:production
       sudo: yes
-    
+
+    - name: Route all traffic to staging app
+      command: echo set route 2 | redis-cli -h 172.17.0.3
+
     - name: stop app
       command: docker rm -f app
       sudo: yes
@@ -72,6 +75,9 @@
           - 3001:3000
         docker_api_version: 1.18
       sudo: yes
+
+    - name: Back to normal routing
+      command: echo set route 0 | redis-cli -h 172.17.0.3
    # - name: run
    #   command: docker run -p 50100:8080 -d --name app localhost:5000/sample:latest
    #   sudo: yes 
