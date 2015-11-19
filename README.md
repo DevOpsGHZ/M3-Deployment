@@ -224,6 +224,16 @@ app.get('/feature',function(req,res){
 
  
 ###Metrics and alerts:
+To monitor the server, three metrics are used: CPU, Mem and Latency.
+
+For convenience, the monitor program is merged into the proxy program so they share the port 3000. The corresponding html report is live on port 8080.
+
+Once the latency is larger that 400 ms, the proxy will stop routing to that node and send an email to notify the developer.
+
+Using the script `siege -b -t60s http://localhost:3001`, we are able to create a high latency.
+
+![latency](images/latency.png)
+
 ###Canary releasing:
 To perform canary release, we use three port to mock different servers. Port 3000 for proxy, 3001 for production and 3002 for staging server. 
     
