@@ -123,7 +123,7 @@ function memoryLoad()
 {
   // console.log("memoryLoad");
   var load = ~~ ( 100 * (os.totalmem() - os.freemem()) / os.totalmem());
-  if(load > 90)
+  if(load > 95)
   {
     client.set("route", 1);
     sendMail();
