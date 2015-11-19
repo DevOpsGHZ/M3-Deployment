@@ -16,7 +16,10 @@
 Use ansible playbook provision.yml install Git, curl, pip, docker-py:     
 `ansible-playbook provision.yml -i inventory`
 ####2.Test and analysis:
-Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in post-commit.sh.
+Extending from [milestone2](https://github.com/DevOpsGHZ/M2-Test_Analysis), we use  mocha and supertest module to do unit test and Jshint to do analysis. Unit tests are writen in /src/test/test.js. Test and analysis shell script is writen in pre-commit.sh.
+![test](images/testanalysis.gif)
+
+
 
 ####3. Deployment:
 Use production.yml through command  `ansible-playbook production.yml -i inventory`  to do following tasks.
